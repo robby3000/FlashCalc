@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>FlashCalc</title>
+<style>
+/* ═══════════════════════════════════════════════════
+   FLASHCALC · Precision Darkroom Instrument Aesthetic
+   Dark as a darkroom, warm as a safelight.
+   ═══════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Surfaces */
+  --bg:       #0a0a0d;
+  --s1:       #101016;
+  --s2:       #17171f;
+  --s3:       #1e1e28;
+  --s4:       #252533;
+  /* Borders */
+  --bd:       #252535;
+  --bd-hi:    #3a3a55;
+  /* Amber safelight */
+  --a:        #c48200;
+  --a-hi:     #e09a14;
+  --a-g:      rgba(196,130,0,0.16);
+  --a-gd:     rgba(196,130,0,0.07);
+  /* Text */
+  --t1:       #d6d6e8;
+  --t2:       #7878a0;
+  --t3:       #404058;
+  /* Danger */
+  --danger:   #b84040;
+  --danger-bg:rgba(184,64,64,0.09);
+  /* Radii */
+  --r:   14px;
+  --rm:  10px;
+  --rs:   6px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--t1);
+  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+/* ─── GRAIN OVERLAY ─────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: .5;
+}
+
+/* ─── HEADER ────────────────────────── */
+.hd {
+  background: var(--s1);
+  border-bottom: 1px solid var(--bd);
+  padding: .9375rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  backdrop-filter: blur(12px);
+}
+
+.hd-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: linear-gradient(145deg, var(--a-hi) 0%, var(--a) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(196,130,0,.3),
+              0 0 20px rgba(196,130,0,.35),
+              0 3px 10px rgba(0,0,0,.5);
+}
+.hd-logo svg { width: 22px; height: 22px; fill: #0a0a0d; }
+
+.hd-brand { line-height: 1; }
+.hd-name {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--t1);
+}
+.hd-sub {
+  font-size: .625rem;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-top: .2rem;
+}
+
+/* ─── MAIN LAYOUT ───────────────────── */
+.app {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+/* ─── CARD ──────────────────────────── */
+.card {
+  background: var(--s1);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: 0 2px 28px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.02) inset;
+}
+
+.card-top {
+  padding: .8125rem 1.125rem;
+  border-bottom: 1px solid var(--bd);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.card-tag {
+  font-size: .5875rem;
+  font-weight: 800;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+
+.card-body { padding: 1.125rem; }
+
+/* ─── BUTTONS ───────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .5rem 1rem;
+  border-radius: var(--rm);
+  font-size: .8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all .14s;
+  white-space: nowrap;
+  line-height: 1;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  letter-spacing: .01em;
+}
+
+.btn-amber {
+  background: var(--a);
+  color: #0a0a0d;
+}
+.btn-amber:hover {
+  background: var(--a-hi);
+  box-shadow: 0 2px 16px rgba(196,130,0,.42);
+  transform: translateY(-1px);
+}
+.btn-amber:active { transform: none; box-shadow: none; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--t2);
+  border: 1px solid var(--bd);
+}
+.btn-ghost:hover { background: var(--s2); color: var(--t1); border-color: var(--bd-hi); }
+
+/* ─── FLASH LIST ────────────────────── */
+.f-list { display: flex; flex-direction: column; gap: .4375rem; }
+
+.f-item {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .875rem 1rem;
+  background: var(--s2);
+  border: 1px solid var(--bd);
+  border-radius: var(--rm);
+  transition: border-color .15s;
+}
+.f-item:hover { border-color: var(--bd-hi); }
+
+.f-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--a);
+  box-shadow: 0 0 10px var(--a);
+  flex-shrink: 0;
+}
+
+.f-info { flex: 1; min-width: 0; }
+
+.f-name {
+  font-size: .9375rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -.01em;
+}
+
+.f-meta {
+  font-size: .7rem;
+  color: var(--t2);
+  margin-top: .125rem;
+  letter-spacing: .01em;
+}
+.f-meta em {
+  font-style: normal;
+  font-family: 'SF Mono','Fira Code','Courier New',monospace;
+  font-size: .75rem;
+  color: var(--a-hi);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.f-del {
+  padding: .375rem .625rem;
+  border-radius: var(--rs);
+  background: transparent;
+  border: none;
+  color: var(--t3);
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .14s;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  letter-spacing: .01em;
+}
+.f-del:hover { color: var(--danger); background: var(--danger-bg); }
+
+/* ─── ZOOM CONTROL ─────────────────── */
+.zoom-fld { display: none; }
+.zoom-fld.visible { display: block; }
+
+/* ─── EMPTY STATE ───────────────────── */
+.empty {
+  padding: 2.75rem 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .9375rem;
+}
+
+.empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 15px;
+  background: var(--s3);
+  border: 1px solid var(--bd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.empty-icon svg { width: 28px; height: 28px; fill: var(--t3); }
+
+.empty h3 {
+  font-size: .9375rem;
+  font-weight: 600;
+  color: var(--t2);
+  line-height: 1.3;
+}
+.empty p {
+  font-size: .8rem;
+  color: var(--t3);
+  line-height: 1.6;
+}
+
+/* ─── FORM FIELDS ───────────────────── */
+.fld { margin-bottom: .875rem; }
+.fld:last-child { margin-bottom: 0; }
+
+.lbl {
+  display: block;
+  font-size: .5875rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--t2);
+  margin-bottom: .4rem;
+}
+
+.inp, .sel {
+  display: block;
+  width: 100%;
+  background: var(--s2);
+  border: 1px solid var(--bd);
+  border-radius: var(--rm);
+  color: var(--t1);
+  font-size: .9375rem;
+  font-family: inherit;
+  padding: .6875rem .9375rem;
+  transition: border-color .14s, box-shadow .14s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.inp:focus, .sel:focus {
+  outline: none;
+  border-color: var(--a);
+  box-shadow: 0 0 0 3px var(--a-g);
+}
+.inp::placeholder { color: var(--t3); }
+.sel option { background: var(--s2); color: var(--t1); }
+
+.sel-wrap { position: relative; }
+.sel-wrap::after {
+  content: '';
+  position: absolute;
+  right: .9375rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 4.5px solid transparent;
+  border-top-color: var(--t2);
+  pointer-events: none;
+  margin-top: 2px;
+}
+
+/* ─── CALC ROW ──────────────────────── */
+.c-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: .875rem;
+  align-items: end;
+  margin-bottom: .875rem;
+}
+
+.unit-grp {
+  display: flex;
+  gap: 2px;
+  background: var(--s2);
+  border: 1px solid var(--bd);
+  border-radius: var(--rm);
+  padding: 3px;
+}
+
+.unit-btn {
+  padding: .5rem .9375rem;
+  border-radius: calc(var(--rm) - 2px);
+  border: none;
+  background: transparent;
+  color: var(--t2);
+  font-size: .875rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  cursor: pointer;
+  transition: all .14s;
+  -webkit-tap-highlight-color: transparent;
+}
+.unit-btn.on {
+  background: var(--a);
+  color: #0a0a0d;
+  box-shadow: 0 0 10px rgba(196,130,0,.3);
+}
+
+/* ─── GO BUTTON ─────────────────────── */
+.go-btn {
+  display: block;
+  width: 100%;
+  margin-top: .9375rem;
+  padding: 1rem;
+  border: none;
+  border-radius: var(--rm);
+  background: var(--a);
+  color: #0a0a0d;
+  font-family: inherit;
+  font-size: .8125rem;
+  font-weight: 800;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all .14s;
+  -webkit-tap-highlight-color: transparent;
+}
+.go-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, rgba(255,255,255,.14) 0%, transparent 55%);
+}
+.go-btn:hover {
+  background: var(--a-hi);
+  box-shadow: 0 4px 32px rgba(196,130,0,.52);
+  transform: translateY(-1px);
+}
+.go-btn:active { transform: none; box-shadow: none; }
+
+/* ─── RESULTS ───────────────────────── */
+.res-area {
+  margin-top: 1.25rem;
+  padding-top: 1.125rem;
+  border-top: 1px solid var(--bd);
+  animation: fade-in .2s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.res-ctx {
+  background: var(--a-gd);
+  border: 1px solid rgba(196,130,0,.18);
+  border-radius: var(--rm);
+  padding: .625rem .9375rem;
+  font-size: .75rem;
+  color: var(--t2);
+  line-height: 1.65;
+  margin-bottom: .875rem;
+}
+.res-ctx strong { color: var(--a-hi); font-weight: 600; }
+
+.res-label {
+  font-size: .5875rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: .625rem;
+}
+
+.res-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: .5rem;
+}
+
+/* ─── RESULT CARD ───────────────────── */
+.rc {
+  background: var(--s2);
+  border: 1px solid var(--bd);
+  border-radius: var(--rm);
+  padding: .9375rem .375rem .8125rem;
+  text-align: center;
+  transition: all .18s;
+  animation: rc-in .38s cubic-bezier(.22,1,.36,1) both;
+  cursor: default;
+}
+
+@keyframes rc-in {
+  from { opacity: 0; transform: translateY(10px) scale(.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+.rc:hover {
+  border-color: var(--a);
+  background: var(--a-g);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(196,130,0,.14), 0 0 0 1px var(--a);
+}
+
+.rc-f {
+  font-size: .625rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  color: var(--a);
+  text-transform: uppercase;
+  margin-bottom: .4375rem;
+}
+
+.rc-val {
+  font-family: 'SF Mono','Fira Code','Courier New',monospace;
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--t1);
+}
+
+.rc-unit {
+  font-size: .5875rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-top: .3125rem;
+}
+
+.no-res {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--t3);
+  font-size: .875rem;
+  line-height: 1.6;
+}
+
+/* ─── TOAST ─────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--s4);
+  border: 1px solid var(--bd-hi);
+  color: var(--t1);
+  padding: .5625rem 1.1875rem;
+  border-radius: 100px;
+  font-size: .8rem;
+  font-weight: 600;
+  transition: transform .32s cubic-bezier(.34,1.56,.64,1);
+  z-index: 999;
+  white-space: nowrap;
+  box-shadow: 0 6px 32px rgba(0,0,0,.6);
+  pointer-events: none;
+  letter-spacing: .01em;
+}
+.toast.on { transform: translateX(-50%) translateY(0); }
+
+/* ─── RESPONSIVE ────────────────────── */
+@media (max-width: 420px) {
+  .c-row { grid-template-columns: 1fr; gap: .625rem; }
+  .unit-grp { width: max-content; }
+}
+@media (max-width: 340px) {
+  .hd { padding: .75rem 1rem; }
+  .hd-logo { width: 36px; height: 36px; }
+}
+
+/* ─── SCROLLBAR ─────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════ -->
+<header class="hd">
+  <div class="hd-logo" aria-hidden="true">
+    <!-- Lightning bolt icon -->
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13 2 3.5 13.5H10l-1.5 8.5L20.5 10.5H14L13 2Z"/>
+    </svg>
+  </div>
+  <div class="hd-brand">
+    <div class="hd-name">FlashCalc</div>
+    <div class="hd-sub">Film Flash Exposure Calculator</div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ══════════════════════════════════════════ -->
+<main class="app">
+
+  <!-- Exposure Calculator -->
+  <div class="card">
+    <div class="card-top">
+      <span class="card-tag">Exposure Calculator</span>
+    </div>
+    <div class="card-body">
+
+      <div class="fld">
+        <label class="lbl" for="sel-flash">Flash Model</label>
+        <div class="sel-wrap">
+          <select class="sel" id="sel-flash">
+            <option value="">— Select a flash unit —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fld zoom-fld" id="zoom-fld">
+        <label class="lbl" for="sel-zoom">Zoom (mm)</label>
+        <div class="sel-wrap">
+          <select class="sel" id="sel-zoom">
+          </select>
+        </div>
+      </div>
+
+      <div class="fld">
+        <label class="lbl" for="inp-iso">ISO / ASA</label>
+        <input class="inp" type="number" id="inp-iso"
+               min="1" max="25600" step="1" value="100"
+               autocomplete="off" inputmode="numeric">
+      </div>
+
+      <div class="fld">
+        <label class="lbl" for="sel-power">Power Output</label>
+        <div class="sel-wrap">
+          <select class="sel" id="sel-power">
+            <option value="1">1</option>
+            <option value="0.5">1/2</option>
+            <option value="0.25">1/4</option>
+            <option value="0.125">1/8</option>
+            <option value="0.0625">1/16</option>
+            <option value="0.03125">1/32</option>
+            <option value="0.015625">1/64</option>
+            <option value="0.0078125">1/128</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="c-row">
+        <div>
+          <div class="lbl" style="margin-bottom:.4rem">Distance</div>
+          <div class="unit-grp" role="group" aria-label="Distance unit">
+            <button class="unit-btn on" id="btn-m"  onclick="setUnit('m')"  aria-pressed="true">m</button>
+            <button class="unit-btn"    id="btn-ft" onclick="setUnit('ft')" aria-pressed="false">ft</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="go-btn" onclick="calculate()">⚡&ensp;Go</button>
+
+      <div id="res-area" style="display:none;"></div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══ TOAST ══════════════════════════════════════════ -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ═══ APPLICATION SCRIPT ════════════════════════════ -->
+<script>
+'use strict';
+
+/* ── Constants ───────────────────────── */
+const APERTURES = [1.4, 2.0, 2.8, 4, 5.6, 8, 11, 16, 22];
+
+/* 
+ * FLASH DATABASE
+ * 
+ * To add a new flash model, insert a new entry into this object.
+ * 
+ * For fixed-GN flashes (no zoom):
+ *   type: "fixed"
+ *   guideNumber: GN at ISO 100 in metres
+ * 
+ * For zoom-capable flashes:
+ *   type: "zoom"
+ *   guideNumbers: Array of { zoom: mm, gn: GN at ISO 100 in metres }
+ * 
+ * Example:
+ *   "My Flash": {
+ *     type: "zoom",
+ *     guideNumbers: [
+ *       { zoom: 24, gn: 28 },
+ *       { zoom: 50, gn: 42 }
+ *     ]
+ *   }
+ */
+const flashes = {
+  "Olympus A11": {
+    type: "fixed",
+    guideNumber: 10
+  },
+
+  "Godox Lux Junior": {
+    type: "fixed",
+    guideNumber: 12
+  },
+
+  "YN-560 III": {
+    type: "zoom",
+    guideNumbers: [
+      { zoom: 18, gn: 15 },  // 24mm + diffuser
+      { zoom: 24, gn: 28 },
+      { zoom: 28, gn: 30 },
+      { zoom: 35, gn: 39 },
+      { zoom: 50, gn: 42 },
+      { zoom: 70, gn: 50 },
+      { zoom: 80, gn: 53 },
+      { zoom: 105, gn: 58 }
+    ]
+  }
+};
+
+/* ── State ───────────────────────────── */
+let unit = 'm';  // distance unit
+
+/* ── Initialise ──────────────────────── */
+(function init() {
+  renderFlashSelect();
+  
+  // Set up flash selection change handler
+  document.getElementById('sel-flash').addEventListener('change', onFlashChange);
+  
+  // Set default power to 1
+  document.getElementById('sel-power').value = '1';
+})();
+
+/* ── Render flash dropdown ───────────── */
+function renderFlashSelect() {
+  const sel = document.getElementById('sel-flash');
+  sel.innerHTML = '<option value="">— Select a flash unit —</option>' +
+    Object.keys(flashes).map(name =>
+      `<option value="${name}">${name}</option>`
+    ).join('');
+}
+
+/* ── Handle flash selection change ──── */
+function onFlashChange() {
+  const flashName = document.getElementById('sel-flash').value;
+  const zoomFld = document.getElementById('zoom-fld');
+  const zoomSel = document.getElementById('sel-zoom');
+  
+  if (!flashName) {
+    zoomFld.classList.remove('visible');
+    zoomSel.innerHTML = '';
+    return;
+  }
+  
+  const flash = flashes[flashName];
+  
+  if (flash.type === 'zoom') {
+    // Generate zoom options from flash data
+    zoomSel.innerHTML = flash.guideNumbers.map(gn =>
+      `<option value="${gn.zoom}">${gn.zoom}mm</option>`
+    ).join('');
+    zoomFld.classList.add('visible');
+  } else {
+    zoomFld.classList.remove('visible');
+    zoomSel.innerHTML = '';
+  }
+}
+
+/* ── Distance unit toggle ────────────── */
+function setUnit(u) {
+  unit = u;
+  const bm  = document.getElementById('btn-m');
+  const bft = document.getElementById('btn-ft');
+  bm.classList.toggle('on', u === 'm');
+  bft.classList.toggle('on', u === 'ft');
+  bm.setAttribute('aria-pressed', u === 'm');
+  bft.setAttribute('aria-pressed', u === 'ft');
+}
+
+/* ── Calculate ───────────────────────── */
+function calculate() {
+  const flashName = document.getElementById('sel-flash').value;
+  const iso = parseFloat(document.getElementById('inp-iso').value);
+  const power = parseFloat(document.getElementById('sel-power').value);
+  const area = document.getElementById('res-area');
+
+  // Validation
+  if (flashName === '') return toast('Please select a flash unit');
+  if (!iso || iso <= 0 || isNaN(iso)) return toast('Please enter a valid ISO value');
+  if (!power || power <= 0 || isNaN(power)) return toast('Please select a valid power output');
+
+  const flash = flashes[flashName];
+  
+  // Get base guide number
+  let baseGN;
+  let zoomInfo = '';
+  
+  if (flash.type === 'zoom') {
+    const zoom = parseInt(document.getElementById('sel-zoom').value, 10);
+    const zoomData = flash.guideNumbers.find(g => g.zoom === zoom);
+    if (!zoomData) return toast('Please select a valid zoom setting');
+    baseGN = zoomData.gn;
+    zoomInfo = ` &bull; Zoom: <strong>${zoom}mm</strong>`;
+  } else {
+    baseGN = flash.guideNumber;
+  }
+
+  // Calculate ISO-adjusted guide number
+  // GN_iso = GN_base × sqrt(ISO / 100)
+  const gnISO = baseGN * Math.sqrt(iso / 100);
+  
+  // Calculate effective guide number with power adjustment
+  // GN_effective = GN_iso × sqrt(powerFraction)
+  const gnEffective = gnISO * Math.sqrt(power);
+  
+  const isFt = unit === 'ft';
+  const ul = isFt ? 'ft' : 'm';
+
+  // Build results: filter to practical distances 0.15 m – 45 m
+  const results = APERTURES
+    .map(f => ({ f, distM: gnEffective / f }))
+    .filter(r => r.distM >= 0.15 && r.distM <= 45);
+
+  area.style.display = 'block';
+
+  if (!results.length) {
+    area.innerHTML = `
+      <div class="res-area">
+        <div class="no-res">
+          No practical combinations for this setup.<br>
+          <span style="color:var(--t3);font-size:.8rem">
+            Try a different ISO, power setting, or a flash with a higher GN.
+          </span>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Format a distance value for display
+  function fmt(metres) {
+    const d = isFt ? metres * 3.28084 : metres;
+    if (d >= 10)  return Math.round(d).toString();
+    if (d >= 1)   return d.toFixed(1);
+    return d.toFixed(2);
+  }
+
+  // Format power for display
+  function fmtPower(p) {
+    if (p === 1) return '1';
+    return `1/${(1/p).toString()}`;
+  }
+
+  area.innerHTML = `
+    <div class="res-area">
+      <div class="res-ctx">
+        <strong>${esc(flashName)}</strong>
+        &bull; Base GN: <strong>${baseGN}</strong> at 100 ISO${zoomInfo}
+        &bull; ISO: <strong>${iso}</strong>
+        &bull; Power: <strong>${fmtPower(power)}</strong>
+        &bull; Effective GN: <strong>${gnEffective.toFixed(1)}</strong>
+        &bull; Distances in <strong>${isFt ? 'feet' : 'metres'}</strong>
+      </div>
+      <div class="res-label">Aperture &rarr; Subject Distance</div>
+      <div class="res-grid">
+        ${results.map((r, i) => `
+          <div class="rc" style="animation-delay:${i * 42}ms">
+            <div class="rc-f">f /${r.f}</div>
+            <div class="rc-val">${fmt(r.distM)}</div>
+            <div class="rc-unit">${ul}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+/* ── HTML escape ─────────────────────── */
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── Toast ───────────────────────────── */
+let toastTmr;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => el.classList.remove('on'), 2900);
+}
+</script>
+</body>
+</html>
