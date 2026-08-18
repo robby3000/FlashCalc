@@ -763,9 +763,6 @@ body::before {
     </div>
     <div class="card-body">
       <div class="f-list" id="flash-list"></div>
-      <div style="margin-top:1.125rem;text-align:center;">
-        <button class="btn btn-ghost" style="font-size:.75rem;padding:.4rem .8rem;" onclick="restoreDefaults()">Restore defaults</button>
-      </div>
     </div>
   </div>
 
@@ -828,36 +825,6 @@ const DB_NAME = 'flashcalc';
 const DB_VERSION = 1;
 const STORE_NAME = 'flashes';
 
-const DEFAULT_FLASHES = [
-  {
-    name: 'Olympus A11',
-    type: 'fixed',
-    guideNumber: 10,
-    builtIn: true,
-  },
-  {
-    name: 'Godox Lux Junior',
-    type: 'fixed',
-    guideNumber: 12,
-    builtIn: true,
-  },
-  {
-    name: 'YN-560 III',
-    type: 'zoom',
-    guideNumbers: [
-      { zoom: 18, gn: 15 },  // 24mm + diffuser
-      { zoom: 24, gn: 28 },
-      { zoom: 28, gn: 30 },
-      { zoom: 35, gn: 39 },
-      { zoom: 50, gn: 42 },
-      { zoom: 70, gn: 50 },
-      { zoom: 80, gn: 53 },
-      { zoom: 105, gn: 58 }
-    ],
-    builtIn: true,
-  }
-];
-
 /* ── IndexedDB Pure Vanilla Layer ───── */
 let dbInstance = null;
 
@@ -918,35 +885,6 @@ async function dbDelete(id) {
   });
 }
 
-async function seedDefaultsIfEmpty() {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const countReq = store.count();
-    countReq.onsuccess = () => {
-      if (countReq.result === 0) {
-        let order = 1;
-        for (const def of DEFAULT_FLASHES) {
-          const rec = {
-            id: generateId(),
-            name: def.name,
-            type: def.type,
-            ...(def.guideNumber !== undefined ? { guideNumber: def.guideNumber } : {}),
-            ...(def.guideNumbers ? { guideNumbers: def.guideNumbers } : {}),
-            builtIn: true,
-            createdAt: order++,
-          };
-          store.put(rec);
-        }
-      }
-    };
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
-  });
-}
-
 function generateId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -998,7 +936,6 @@ async function init() {
   });
 
   try {
-    await seedDefaultsIfEmpty();
     await refreshFlashData();
   } catch (err) {
     console.error('Failed to initialize flashes DB:', err);
@@ -1076,8 +1013,8 @@ function renderFlashList() {
         <div class="empty-icon">
           <svg viewBox="0 0 24 24"><path d="M13 2 3.5 13.5H10l-1.5 8.5L20.5 10.5H14L13 2Z"/></svg>
         </div>
-        <h3>No flash units</h3>
-        <p>Add a flash or click Restore defaults below.</p>
+        <h3>No flash units yet</h3>
+        <p>Click <strong>+ Add flash</strong> above to add your first flash unit.</p>
       </div>`;
     return;
   }
@@ -1324,7 +1261,6 @@ async function saveFlashFromModal() {
       name,
       type: 'fixed',
       guideNumber: gn,
-      builtIn: existing ? !!existing.builtIn : false,
       createdAt: existing ? existing.createdAt : Date.now(),
     };
   } else {
@@ -1349,7 +1285,6 @@ async function saveFlashFromModal() {
       name,
       type: 'zoom',
       guideNumbers,
-      builtIn: existing ? !!existing.builtIn : false,
       createdAt: existing ? existing.createdAt : Date.now(),
     };
   }
@@ -1376,10 +1311,8 @@ async function deleteFlashById(id) {
   const flash = flashMap.get(id);
   if (!flash) return;
 
-  if (flash.builtIn) {
-    const ok = confirm(`Delete built-in flash "${flash.name}"?\nYou can restore it later via "Restore defaults".`);
-    if (!ok) return;
-  }
+  const ok = confirm(`Delete flash "${flash.name}"?`);
+  if (!ok) return;
 
   try {
     await dbDelete(id);
@@ -1392,40 +1325,6 @@ async function deleteFlashById(id) {
     console.error('Delete failed:', err);
     toast('Error deleting flash');
   }
-}
-
-async function restoreDefaults() {
-  const current = await dbGetAll();
-  const existingNames = new Set(current.map(f => f.name.trim().toLowerCase()));
-  const missing = DEFAULT_FLASHES.filter(df => !existingNames.has(df.name.trim().toLowerCase()));
-
-  if (missing.length === 0) {
-    return toast('All default flash units are already present');
-  }
-
-  const db = await openDB();
-  await new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    let order = Date.now();
-    for (const f of missing) {
-      store.put({
-        id: generateId(),
-        name: f.name,
-        type: f.type,
-        ...(f.guideNumber !== undefined ? { guideNumber: f.guideNumber } : {}),
-        ...(f.guideNumbers ? { guideNumbers: f.guideNumbers } : {}),
-        builtIn: true,
-        createdAt: order++,
-      });
-    }
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
-  });
-
-  await refreshFlashData();
-  toast(`Restored ${missing.length} default flash unit${missing.length > 1 ? 's' : ''}`);
 }
 
 /* ── HTML escape ─────────────────────── */

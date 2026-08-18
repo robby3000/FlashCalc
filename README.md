@@ -10,21 +10,10 @@ Built as a persistent offline-first single-file Progressive Web App (PWA) — ze
   $$\text{GN}_{\text{iso}} = \text{GN}_{\text{base}} \times \sqrt{\frac{\text{ISO}}{100}}$$
   $$\text{GN}_{\text{effective}} = \text{GN}_{\text{iso}} \times \sqrt{\text{power}}$$
   $$\text{distance} = \frac{\text{GN}_{\text{effective}}}{\text{aperture}}$$
-- **User-Managed Flash Units:** Add, edit, and delete custom flash units directly in the UI. Persisted locally via vanilla IndexedDB.
-- **Restore Defaults:** Easily restore built-in flash presets without overwriting custom units.
+- **User-Managed Flash Units:** Add, edit, and delete your own flash units directly in the UI. Persisted locally in your browser via vanilla IndexedDB.
 - **Offline-First PWA:** Installable on iOS and Android with complete offline functionality.
 - **Safe-Area Layout:** Designed for standalone mobile screens with notch and home-indicator clearance.
 - **Darkroom Instrument UI:** High-contrast dark theme with safelight amber accents.
-
-## Built-in Flash Units
-
-| Model | Type | Guide Number (m @ ISO 100) |
-| --- | --- | --- |
-| Olympus A11 | fixed | 10 |
-| Godox Lux Junior | fixed | 12 |
-| YN-560 III | zoom | 15–58 (18–105 mm) |
-
-Users can manage built-in and custom flash units directly from the "My Flash Units" section.
 
 ## Installing as a PWA
 
