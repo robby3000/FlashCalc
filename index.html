@@ -684,7 +684,7 @@ body::before {
   </div>
   <div class="hd-brand">
     <div class="hd-name">FlashCalc</div>
-    <div class="hd-sub">Film Flash Exposure Calculator</div>
+    <div class="hd-sub">Flash Exposure Calculator</div>
   </div>
 </header>
 
@@ -941,6 +941,26 @@ async function init() {
     console.error('Failed to initialize flashes DB:', err);
     toast('Error loading flashes database');
   }
+
+  // Ask the browser to mark our storage as persistent so the user's flash
+  // library is not evicted under disk pressure. No-op on iOS (installation
+  // is the only persistence lever there); effective on Android Chrome.
+  requestPersistentStorage();
+}
+
+function requestPersistentStorage() {
+  if (!navigator.storage || !navigator.storage.persist) return;
+  // Some browsers refuse persist() before a user gesture; retry once on the
+  // first interaction if the initial attempt is denied.
+  const tryPersist = () => navigator.storage.persist().catch(() => {});
+  tryPersist();
+  const onFirstGesture = () => {
+    navigator.storage.persisted && navigator.storage.persisted().then(ok => {
+      if (!ok) tryPersist();
+    }).catch(() => {});
+    window.removeEventListener('pointerdown', onFirstGesture);
+  };
+  window.addEventListener('pointerdown', onFirstGesture, { once: false });
 }
 
 /* ── Refresh flash data from DB ─────── */
