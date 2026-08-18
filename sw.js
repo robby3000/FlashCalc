@@ -1,7 +1,7 @@
 // Service Worker for FlashCalc PWA.
 // Single-file offline-first PWA. Zero dependencies.
 
-const CACHE = 'flashcalc-v0.1.0-95fc3f89';
+const CACHE = 'flashcalc-v0.1.0-e08a7654';
 
 // Resolved against the worker's own URL, so the app works at a domain root
 // or under a subpath (e.g. GitHub Pages project sites) with no changes.
