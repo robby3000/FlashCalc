@@ -2,7 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#c48200">
+<meta name="description" content="Film flash exposure calculator.">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FlashCalc">
 <title>FlashCalc</title>
 <style>
 /* ═══════════════════════════════════════════════════
@@ -66,6 +75,9 @@ body::before {
   background: var(--s1);
   border-bottom: 1px solid var(--bd);
   padding: .9375rem 1.25rem;
+  padding-top: calc(.9375rem + env(safe-area-inset-top, 0px));
+  padding-left: calc(1.25rem + env(safe-area-inset-left, 0px));
+  padding-right: calc(1.25rem + env(safe-area-inset-right, 0px));
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -111,6 +123,9 @@ body::before {
   max-width: 660px;
   margin: 0 auto;
   padding: 1.25rem 1rem 3.5rem;
+  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+  padding-left: calc(1rem + env(safe-area-inset-left, 0px));
+  padding-right: calc(1rem + env(safe-area-inset-right, 0px));
   display: flex;
   flex-direction: column;
   gap: 1.125rem;
@@ -148,6 +163,7 @@ body::before {
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: .35rem;
   padding: .5rem 1rem;
   border-radius: var(--rm);
@@ -161,6 +177,7 @@ body::before {
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   letter-spacing: .01em;
+  font-family: inherit;
 }
 
 .btn-amber {
@@ -180,6 +197,30 @@ body::before {
   border: 1px solid var(--bd);
 }
 .btn-ghost:hover { background: var(--s2); color: var(--t1); border-color: var(--bd-hi); }
+.btn-ghost:active { transform: none; }
+
+.btn-sm {
+  padding: .35rem .65rem;
+  font-size: .75rem;
+  border-radius: var(--rs);
+}
+
+.btn-icon-del {
+  padding: .375rem .5rem;
+  border-radius: var(--rs);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--t3);
+  font-size: .875rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: all .14s;
+}
+.btn-icon-del:hover {
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-color: rgba(184,64,64,0.25);
+}
 
 /* ─── FLASH LIST ────────────────────── */
 .f-list { display: flex; flex-direction: column; gap: .4375rem; }
@@ -229,6 +270,13 @@ body::before {
   color: var(--a-hi);
   font-weight: 600;
   letter-spacing: 0;
+}
+
+.f-actions {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  flex-shrink: 0;
 }
 
 .f-del {
@@ -364,6 +412,7 @@ body::before {
   cursor: pointer;
   transition: all .14s;
   -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
 }
 .unit-btn.on {
   background: var(--a);
@@ -504,6 +553,87 @@ body::before {
   line-height: 1.6;
 }
 
+/* ─── MODAL ─────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,13,0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+  backdrop-filter: blur(6px);
+  animation: fade-in .15s ease;
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.modal {
+  background: var(--s1);
+  border: 1px solid var(--bd-hi);
+  border-radius: var(--r);
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 48px rgba(0,0,0,.75);
+  overflow: hidden;
+}
+
+.modal-top {
+  padding: .875rem 1.125rem;
+  border-bottom: 1px solid var(--bd);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: .9375rem;
+  font-weight: 700;
+  color: var(--t1);
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--t2);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: .25rem;
+  border-radius: var(--rs);
+}
+.modal-close:hover { color: var(--t1); background: var(--s2); }
+
+.modal-body {
+  padding: 1.125rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: .875rem;
+}
+
+.modal-foot {
+  padding: .875rem 1.125rem;
+  border-top: 1px solid var(--bd);
+  display: flex;
+  justify-content: flex-end;
+  gap: .625rem;
+  background: var(--s1);
+}
+
+.zoom-step-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: .5rem;
+  align-items: center;
+}
+
 /* ─── TOAST ─────────────────────────── */
 .toast {
   position: fixed;
@@ -625,7 +755,64 @@ body::before {
     </div>
   </div>
 
+  <!-- My Flash Units -->
+  <div class="card">
+    <div class="card-top">
+      <span class="card-tag">My Flash Units</span>
+      <button class="btn btn-amber btn-sm" onclick="openAddFlashModal()">+ Add flash</button>
+    </div>
+    <div class="card-body">
+      <div class="f-list" id="flash-list"></div>
+      <div style="margin-top:1.125rem;text-align:center;">
+        <button class="btn btn-ghost" style="font-size:.75rem;padding:.4rem .8rem;" onclick="restoreDefaults()">Restore defaults</button>
+      </div>
+    </div>
+  </div>
+
 </main>
+
+<!-- ═══ MODAL FOR ADD / EDIT FLASH ════════════════════ -->
+<div class="modal-backdrop" id="flash-modal-backdrop" hidden onclick="onModalBackdropClick(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="modal-top">
+      <h3 class="modal-title" id="modal-heading">Add Flash Unit</h3>
+      <button class="modal-close" onclick="closeFlashModal()" aria-label="Close dialog">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="modal-flash-id" value="">
+
+      <div class="fld">
+        <label class="lbl" for="modal-flash-name">Flash Name</label>
+        <input class="inp" type="text" id="modal-flash-name" placeholder="e.g. Nikon SB-24" autocomplete="off">
+      </div>
+
+      <div class="fld">
+        <div class="lbl">Flash Type</div>
+        <div class="unit-grp" role="group" aria-label="Flash Type">
+          <button type="button" class="unit-btn on" id="modal-type-fixed" onclick="setModalType('fixed')">Fixed GN</button>
+          <button type="button" class="unit-btn" id="modal-type-zoom" onclick="setModalType('zoom')">Zoom Head</button>
+        </div>
+      </div>
+
+      <!-- Fixed GN Section -->
+      <div id="modal-fixed-sec" class="fld">
+        <label class="lbl" for="modal-flash-gn">Guide Number (ISO 100, metres)</label>
+        <input class="inp" type="number" id="modal-flash-gn" min="0.1" step="0.1" placeholder="e.g. 20" inputmode="decimal">
+      </div>
+
+      <!-- Zoom Head Section -->
+      <div id="modal-zoom-sec" class="fld" style="display:none;">
+        <div class="lbl">Zoom Steps (mm &amp; GN in metres at ISO 100)</div>
+        <div id="modal-zoom-list" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.625rem;"></div>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addModalZoomRow()">+ Add zoom step</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" onclick="closeFlashModal()">Cancel</button>
+      <button type="button" class="btn btn-amber" onclick="saveFlashFromModal()">Save Flash</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ TOAST ══════════════════════════════════════════ -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -637,41 +824,26 @@ body::before {
 /* ── Constants ───────────────────────── */
 const APERTURES = [1.4, 2.0, 2.8, 4, 5.6, 8, 11, 16, 22];
 
-/* 
- * FLASH DATABASE
- * 
- * To add a new flash model, insert a new entry into this object.
- * 
- * For fixed-GN flashes (no zoom):
- *   type: "fixed"
- *   guideNumber: GN at ISO 100 in metres
- * 
- * For zoom-capable flashes:
- *   type: "zoom"
- *   guideNumbers: Array of { zoom: mm, gn: GN at ISO 100 in metres }
- * 
- * Example:
- *   "My Flash": {
- *     type: "zoom",
- *     guideNumbers: [
- *       { zoom: 24, gn: 28 },
- *       { zoom: 50, gn: 42 }
- *     ]
- *   }
- */
-const flashes = {
-  "Olympus A11": {
-    type: "fixed",
-    guideNumber: 10
-  },
+const DB_NAME = 'flashcalc';
+const DB_VERSION = 1;
+const STORE_NAME = 'flashes';
 
-  "Godox Lux Junior": {
-    type: "fixed",
-    guideNumber: 12
+const DEFAULT_FLASHES = [
+  {
+    name: 'Olympus A11',
+    type: 'fixed',
+    guideNumber: 10,
+    builtIn: true,
   },
-
-  "YN-560 III": {
-    type: "zoom",
+  {
+    name: 'Godox Lux Junior',
+    type: 'fixed',
+    guideNumber: 12,
+    builtIn: true,
+  },
+  {
+    name: 'YN-560 III',
+    type: 'zoom',
     guideNumbers: [
       { zoom: 18, gn: 15 },  // 24mm + diffuser
       { zoom: 24, gn: 28 },
@@ -681,52 +853,213 @@ const flashes = {
       { zoom: 70, gn: 50 },
       { zoom: 80, gn: 53 },
       { zoom: 105, gn: 58 }
-    ]
+    ],
+    builtIn: true,
   }
-};
+];
+
+/* ── IndexedDB Pure Vanilla Layer ───── */
+let dbInstance = null;
+
+function openDB() {
+  if (dbInstance) return Promise.resolve(dbInstance);
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = () => {
+      dbInstance = req.result;
+      resolve(dbInstance);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbGetAll() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.getAll();
+    req.onsuccess = () => {
+      const list = req.result || [];
+      list.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      resolve(list);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbPut(record) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.put(record);
+    tx.oncomplete = () => resolve(record);
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+
+async function dbDelete(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+
+async function seedDefaultsIfEmpty() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const countReq = store.count();
+    countReq.onsuccess = () => {
+      if (countReq.result === 0) {
+        let order = 1;
+        for (const def of DEFAULT_FLASHES) {
+          const rec = {
+            id: generateId(),
+            name: def.name,
+            type: def.type,
+            ...(def.guideNumber !== undefined ? { guideNumber: def.guideNumber } : {}),
+            ...(def.guideNumbers ? { guideNumbers: def.guideNumbers } : {}),
+            builtIn: true,
+            createdAt: order++,
+          };
+          store.put(rec);
+        }
+      }
+    };
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+
+function generateId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'fc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+}
 
 /* ── State ───────────────────────────── */
-let unit = 'm';  // distance unit
+let flashes = [];            // List of flash objects
+let flashMap = new Map();    // id -> flash object
+let unit = 'm';              // distance unit
+let modalType = 'fixed';     // 'fixed' | 'zoom'
 
 /* ── Initialise ──────────────────────── */
-(function init() {
-  renderFlashSelect();
-  
+async function init() {
+  // Load distance unit from localStorage
+  const savedUnit = localStorage.getItem('fc_unit');
+  if (savedUnit === 'ft' || savedUnit === 'm') {
+    setUnit(savedUnit);
+  }
+
+  // Load ISO from localStorage
+  const savedIso = localStorage.getItem('fc_iso');
+  if (savedIso) {
+    document.getElementById('inp-iso').value = savedIso;
+  }
+  document.getElementById('inp-iso').addEventListener('input', () => {
+    localStorage.setItem('fc_iso', document.getElementById('inp-iso').value);
+  });
+
+  // Load power from localStorage
+  const savedPower = localStorage.getItem('fc_power');
+  if (savedPower) {
+    document.getElementById('sel-power').value = savedPower;
+  }
+  document.getElementById('sel-power').addEventListener('change', () => {
+    localStorage.setItem('fc_power', document.getElementById('sel-power').value);
+  });
+
   // Set up flash selection change handler
-  document.getElementById('sel-flash').addEventListener('change', onFlashChange);
-  
-  // Set default power to 1
-  document.getElementById('sel-power').value = '1';
-})();
+  document.getElementById('sel-flash').addEventListener('change', () => {
+    const flashId = document.getElementById('sel-flash').value;
+    localStorage.setItem('fc_selected_flash', flashId);
+    onFlashChange();
+  });
+
+  document.getElementById('sel-zoom').addEventListener('change', () => {
+    localStorage.setItem('fc_selected_zoom', document.getElementById('sel-zoom').value);
+  });
+
+  try {
+    await seedDefaultsIfEmpty();
+    await refreshFlashData();
+  } catch (err) {
+    console.error('Failed to initialize flashes DB:', err);
+    toast('Error loading flashes database');
+  }
+}
+
+/* ── Refresh flash data from DB ─────── */
+async function refreshFlashData() {
+  flashes = await dbGetAll();
+  flashMap = new Map(flashes.map(f => [f.id, f]));
+  renderFlashSelect();
+  renderFlashList();
+}
 
 /* ── Render flash dropdown ───────────── */
 function renderFlashSelect() {
   const sel = document.getElementById('sel-flash');
+  const prevSelected = localStorage.getItem('fc_selected_flash') || sel.value;
+
   sel.innerHTML = '<option value="">— Select a flash unit —</option>' +
-    Object.keys(flashes).map(name =>
-      `<option value="${name}">${name}</option>`
-    ).join('');
+    flashes.map(f => `<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
+
+  if (prevSelected && flashMap.has(prevSelected)) {
+    sel.value = prevSelected;
+  } else if (flashes.length > 0) {
+    sel.value = flashes[0].id;
+    localStorage.setItem('fc_selected_flash', flashes[0].id);
+  } else {
+    sel.value = '';
+    localStorage.removeItem('fc_selected_flash');
+  }
+
+  onFlashChange();
 }
 
 /* ── Handle flash selection change ──── */
 function onFlashChange() {
-  const flashName = document.getElementById('sel-flash').value;
+  const flashId = document.getElementById('sel-flash').value;
   const zoomFld = document.getElementById('zoom-fld');
   const zoomSel = document.getElementById('sel-zoom');
-  
-  if (!flashName) {
+
+  if (!flashId || !flashMap.has(flashId)) {
     zoomFld.classList.remove('visible');
     zoomSel.innerHTML = '';
     return;
   }
-  
-  const flash = flashes[flashName];
-  
-  if (flash.type === 'zoom') {
-    // Generate zoom options from flash data
+
+  const flash = flashMap.get(flashId);
+
+  if (flash.type === 'zoom' && Array.isArray(flash.guideNumbers) && flash.guideNumbers.length > 0) {
+    const prevZoom = localStorage.getItem('fc_selected_zoom');
     zoomSel.innerHTML = flash.guideNumbers.map(gn =>
       `<option value="${gn.zoom}">${gn.zoom}mm</option>`
     ).join('');
+
+    if (prevZoom && flash.guideNumbers.some(gn => String(gn.zoom) === String(prevZoom))) {
+      zoomSel.value = prevZoom;
+    } else {
+      zoomSel.value = flash.guideNumbers[0].zoom;
+    }
     zoomFld.classList.add('visible');
   } else {
     zoomFld.classList.remove('visible');
@@ -734,9 +1067,57 @@ function onFlashChange() {
   }
 }
 
+/* ── Render "My Flash Units" list ────── */
+function renderFlashList() {
+  const container = document.getElementById('flash-list');
+  if (!flashes.length) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24"><path d="M13 2 3.5 13.5H10l-1.5 8.5L20.5 10.5H14L13 2Z"/></svg>
+        </div>
+        <h3>No flash units</h3>
+        <p>Add a flash or click Restore defaults below.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = flashes.map(f => {
+    let summary = '';
+    if (f.type === 'zoom' && Array.isArray(f.guideNumbers) && f.guideNumbers.length > 0) {
+      const gns = [...f.guideNumbers].sort((a, b) => a.zoom - b.zoom);
+      if (gns.length === 1) {
+        summary = `<em>GN ${gns[0].gn} @ ${gns[0].zoom}mm</em> (at ISO 100)`;
+      } else {
+        const minGN = Math.min(...gns.map(g => g.gn));
+        const maxGN = Math.max(...gns.map(g => g.gn));
+        const minZ = gns[0].zoom;
+        const maxZ = gns[gns.length - 1].zoom;
+        summary = `<em>GN ${minGN}–${maxGN} @ ${minZ}–${maxZ}mm</em> (at ISO 100)`;
+      }
+    } else {
+      summary = `<em>GN ${f.guideNumber || 0}</em> (at ISO 100)`;
+    }
+
+    return `
+      <div class="f-item">
+        <div class="f-dot"></div>
+        <div class="f-info">
+          <div class="f-name">${esc(f.name)}</div>
+          <div class="f-meta">${summary}</div>
+        </div>
+        <div class="f-actions">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="openEditFlash('${esc(f.id)}')">Edit</button>
+          <button type="button" class="f-del" onclick="deleteFlashById('${esc(f.id)}')">Delete</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 /* ── Distance unit toggle ────────────── */
 function setUnit(u) {
   unit = u;
+  localStorage.setItem('fc_unit', u);
   const bm  = document.getElementById('btn-m');
   const bft = document.getElementById('btn-ft');
   bm.classList.toggle('on', u === 'm');
@@ -747,25 +1128,25 @@ function setUnit(u) {
 
 /* ── Calculate ───────────────────────── */
 function calculate() {
-  const flashName = document.getElementById('sel-flash').value;
+  const flashId = document.getElementById('sel-flash').value;
   const iso = parseFloat(document.getElementById('inp-iso').value);
   const power = parseFloat(document.getElementById('sel-power').value);
   const area = document.getElementById('res-area');
 
   // Validation
-  if (flashName === '') return toast('Please select a flash unit');
+  if (!flashId || !flashMap.has(flashId)) return toast('Please select a flash unit');
   if (!iso || iso <= 0 || isNaN(iso)) return toast('Please enter a valid ISO value');
   if (!power || power <= 0 || isNaN(power)) return toast('Please select a valid power output');
 
-  const flash = flashes[flashName];
-  
+  const flash = flashMap.get(flashId);
+
   // Get base guide number
   let baseGN;
   let zoomInfo = '';
-  
+
   if (flash.type === 'zoom') {
     const zoom = parseInt(document.getElementById('sel-zoom').value, 10);
-    const zoomData = flash.guideNumbers.find(g => g.zoom === zoom);
+    const zoomData = (flash.guideNumbers || []).find(g => g.zoom === zoom);
     if (!zoomData) return toast('Please select a valid zoom setting');
     baseGN = zoomData.gn;
     zoomInfo = ` &bull; Zoom: <strong>${zoom}mm</strong>`;
@@ -773,14 +1154,18 @@ function calculate() {
     baseGN = flash.guideNumber;
   }
 
+  if (!baseGN || isNaN(baseGN) || baseGN <= 0) {
+    return toast('Invalid guide number for this flash');
+  }
+
   // Calculate ISO-adjusted guide number
   // GN_iso = GN_base × sqrt(ISO / 100)
   const gnISO = baseGN * Math.sqrt(iso / 100);
-  
+
   // Calculate effective guide number with power adjustment
   // GN_effective = GN_iso × sqrt(powerFraction)
   const gnEffective = gnISO * Math.sqrt(power);
-  
+
   const isFt = unit === 'ft';
   const ul = isFt ? 'ft' : 'm';
 
@@ -821,7 +1206,7 @@ function calculate() {
   area.innerHTML = `
     <div class="res-area">
       <div class="res-ctx">
-        <strong>${esc(flashName)}</strong>
+        <strong>${esc(flash.name)}</strong>
         &bull; Base GN: <strong>${baseGN}</strong> at 100 ISO${zoomInfo}
         &bull; ISO: <strong>${iso}</strong>
         &bull; Power: <strong>${fmtPower(power)}</strong>
@@ -840,6 +1225,209 @@ function calculate() {
     </div>`;
 }
 
+/* ── Modal & Flash CRUD ─────────────── */
+function openAddFlashModal() {
+  document.getElementById('modal-heading').textContent = 'Add Flash Unit';
+  document.getElementById('modal-flash-id').value = '';
+  document.getElementById('modal-flash-name').value = '';
+  document.getElementById('modal-flash-gn').value = '';
+  document.getElementById('modal-zoom-list').innerHTML = '';
+  setModalType('fixed');
+  addModalZoomRow(24, 28);
+  addModalZoomRow(50, 42);
+  document.getElementById('flash-modal-backdrop').hidden = false;
+  document.getElementById('modal-flash-name').focus();
+}
+
+function openEditFlash(id) {
+  const flash = flashMap.get(id);
+  if (!flash) return;
+
+  document.getElementById('modal-heading').textContent = 'Edit Flash Unit';
+  document.getElementById('modal-flash-id').value = flash.id;
+  document.getElementById('modal-flash-name').value = flash.name;
+  document.getElementById('modal-flash-gn').value = flash.guideNumber || '';
+
+  const zoomList = document.getElementById('modal-zoom-list');
+  zoomList.innerHTML = '';
+  if (flash.type === 'zoom' && Array.isArray(flash.guideNumbers)) {
+    for (const row of flash.guideNumbers) {
+      addModalZoomRow(row.zoom, row.gn);
+    }
+  } else {
+    addModalZoomRow(24, 28);
+    addModalZoomRow(50, 42);
+  }
+
+  setModalType(flash.type || 'fixed');
+  document.getElementById('flash-modal-backdrop').hidden = false;
+  document.getElementById('modal-flash-name').focus();
+}
+
+function closeFlashModal() {
+  document.getElementById('flash-modal-backdrop').hidden = true;
+}
+
+function onModalBackdropClick(event) {
+  if (event.target === document.getElementById('flash-modal-backdrop')) {
+    closeFlashModal();
+  }
+}
+
+function setModalType(type) {
+  modalType = type;
+  const btnFixed = document.getElementById('modal-type-fixed');
+  const btnZoom = document.getElementById('modal-type-zoom');
+  const secFixed = document.getElementById('modal-fixed-sec');
+  const secZoom = document.getElementById('modal-zoom-sec');
+
+  btnFixed.classList.toggle('on', type === 'fixed');
+  btnZoom.classList.toggle('on', type === 'zoom');
+
+  if (type === 'fixed') {
+    secFixed.style.display = 'block';
+    secZoom.style.display = 'none';
+  } else {
+    secFixed.style.display = 'none';
+    secZoom.style.display = 'block';
+  }
+}
+
+function addModalZoomRow(zoomVal = '', gnVal = '') {
+  const list = document.getElementById('modal-zoom-list');
+  const row = document.createElement('div');
+  row.className = 'zoom-step-row';
+  row.innerHTML = `
+    <input class="inp zoom-inp" type="number" min="1" step="1" placeholder="Zoom (mm)" value="${zoomVal}" inputmode="numeric">
+    <input class="inp gn-inp" type="number" min="0.1" step="0.1" placeholder="GN (m)" value="${gnVal}" inputmode="decimal">
+    <button type="button" class="btn-icon-del" onclick="this.parentElement.remove()" aria-label="Remove step">&times;</button>
+  `;
+  list.appendChild(row);
+}
+
+async function saveFlashFromModal() {
+  const id = document.getElementById('modal-flash-id').value;
+  const name = document.getElementById('modal-flash-name').value.trim();
+
+  if (!name) return toast('Please enter a flash name');
+
+  let record = null;
+  const existing = id ? flashMap.get(id) : null;
+
+  if (modalType === 'fixed') {
+    const gn = parseFloat(document.getElementById('modal-flash-gn').value);
+    if (!gn || isNaN(gn) || gn <= 0) {
+      return toast('Please enter a valid Guide Number (> 0)');
+    }
+    record = {
+      id: id || generateId(),
+      name,
+      type: 'fixed',
+      guideNumber: gn,
+      builtIn: existing ? !!existing.builtIn : false,
+      createdAt: existing ? existing.createdAt : Date.now(),
+    };
+  } else {
+    const rows = Array.from(document.querySelectorAll('#modal-zoom-list .zoom-step-row'));
+    if (!rows.length) return toast('Please add at least one zoom step');
+
+    const guideNumbers = [];
+    for (const r of rows) {
+      const zoom = parseInt(r.querySelector('.zoom-inp').value, 10);
+      const gn = parseFloat(r.querySelector('.gn-inp').value);
+      if (!zoom || isNaN(zoom) || zoom <= 0 || !gn || isNaN(gn) || gn <= 0) {
+        return toast('All zoom steps must have positive Zoom and GN values');
+      }
+      guideNumbers.push({ zoom, gn });
+    }
+
+    // Sort ascending by zoom
+    guideNumbers.sort((a, b) => a.zoom - b.zoom);
+
+    record = {
+      id: id || generateId(),
+      name,
+      type: 'zoom',
+      guideNumbers,
+      builtIn: existing ? !!existing.builtIn : false,
+      createdAt: existing ? existing.createdAt : Date.now(),
+    };
+  }
+
+  // Warn on duplicate name if different ID
+  const isDuplicate = flashes.some(f => f.name.toLowerCase() === name.toLowerCase() && f.id !== record.id);
+  if (isDuplicate) {
+    toast(`Note: Flash with name "${name}" already exists`);
+  }
+
+  try {
+    await dbPut(record);
+    closeFlashModal();
+    localStorage.setItem('fc_selected_flash', record.id);
+    await refreshFlashData();
+    toast(`Saved "${record.name}"`);
+  } catch (err) {
+    console.error('Save failed:', err);
+    toast('Error saving flash');
+  }
+}
+
+async function deleteFlashById(id) {
+  const flash = flashMap.get(id);
+  if (!flash) return;
+
+  if (flash.builtIn) {
+    const ok = confirm(`Delete built-in flash "${flash.name}"?\nYou can restore it later via "Restore defaults".`);
+    if (!ok) return;
+  }
+
+  try {
+    await dbDelete(id);
+    if (localStorage.getItem('fc_selected_flash') === id) {
+      localStorage.removeItem('fc_selected_flash');
+    }
+    await refreshFlashData();
+    toast(`Deleted "${flash.name}"`);
+  } catch (err) {
+    console.error('Delete failed:', err);
+    toast('Error deleting flash');
+  }
+}
+
+async function restoreDefaults() {
+  const current = await dbGetAll();
+  const existingNames = new Set(current.map(f => f.name.trim().toLowerCase()));
+  const missing = DEFAULT_FLASHES.filter(df => !existingNames.has(df.name.trim().toLowerCase()));
+
+  if (missing.length === 0) {
+    return toast('All default flash units are already present');
+  }
+
+  const db = await openDB();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    let order = Date.now();
+    for (const f of missing) {
+      store.put({
+        id: generateId(),
+        name: f.name,
+        type: f.type,
+        ...(f.guideNumber !== undefined ? { guideNumber: f.guideNumber } : {}),
+        ...(f.guideNumbers ? { guideNumbers: f.guideNumbers } : {}),
+        builtIn: true,
+        createdAt: order++,
+      });
+    }
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+
+  await refreshFlashData();
+  toast(`Restored ${missing.length} default flash unit${missing.length > 1 ? 's' : ''}`);
+}
+
 /* ── HTML escape ─────────────────────── */
 function esc(s) {
   return String(s)
@@ -855,6 +1443,16 @@ function toast(msg) {
   el.classList.add('on');
   clearTimeout(toastTmr);
   toastTmr = setTimeout(() => el.classList.remove('on'), 2900);
+}
+
+/* ── Start App ───────────────────────── */
+init();
+
+/* ── Service Worker Registration ─────── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('[sw] reg failed:', err));
+  });
 }
 </script>
 </body>

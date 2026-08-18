@@ -1,0 +1,12 @@
+{
+  "name": "flashcalc",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Film flash exposure calculator. Single-file PWA, zero dependencies.",
+  "scripts": {
+    "serve": "python3 -m http.server 8080",
+    "stamp": "node scripts/stamp-sw.mjs",
+    "stamp:check": "node scripts/stamp-sw.mjs --check"
+  }
+}
